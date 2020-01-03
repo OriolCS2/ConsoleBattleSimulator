@@ -1,4 +1,5 @@
 #include <iostream>
+#include "BattleSimulator.h"
 
 enum State {
 	IA,
@@ -11,9 +12,10 @@ State state = INIT;
 class Character {
 
 public:
-	Character(int basic_attack, int defense, int live, int mana, int magic_attack, int magic_defense, int speed, const char* name)
-		: basic_attack(basic_attack), defense(defense), live(live), mana(mana), magic_attack(magic_attack), 
-		magic_defense(magic_defense), speed(speed), name(name) {}
+	Character(int basic_attack, int defense, int live, int mana, int special_attack, int speed, const char* name, 
+		int cost_mana_special_attack, int cost_mana_buff)
+		: basic_attack(basic_attack), defense(defense), live(live), mana(mana), speed(speed), name(name),
+		special_attack(special_attack), cost_mana_buff(cost_mana_buff), cost_mana_special_attack(cost_mana_special_attack) {}
 
 	bool IsAlive() {
 		return live > 0;
@@ -24,20 +26,41 @@ public:
 	const char* GetName() {
 		return name.data();
 	}
+	int CostBuff() {
+		return cost_mana_buff;
+	}
+	int CostSpecialAttack() {
+		return cost_mana_special_attack;
+	}
+	bool CanDoSpecialAttack() {
+		return mana >= cost_mana_special_attack;
+	}
+	bool CanDoBuff() {
+		return mana >= cost_mana_buff;
+	}
+
 	void PrintStats() {
-		printf(" ---------------%s Stats---------------\n", name.data());
-		printf(" ---------------%s Stats---------------\n\n", name.data());
+		printf("---------------%s Stats---------------\n", name.data());
+		printf("---------------HEALTH: %i\n", live);
+		printf("---------------MANA: %i\n", mana);
+		printf("---------------BASIC ATTACK DAMAGE: %i\n", basic_attack);
+		printf("---------------SPECIAL ATTACK DAMAGE: %i\n", special_attack);
+		printf("---------------DEFENSE: %i\n", defense);
+		printf("---------------SPEED: %i\n", speed);
+		printf("---------------%s Stats---------------\n\n", name.data());
 	}
 
 private:
 
 	int basic_attack = 0;
+	int special_attack = 0;
 	int defense = 0;
 	int live = 0;
 	int mana = 0;
-	int magic_attack = 0;
-	int magic_defense = 0;
 	int speed = 0;
+
+	int cost_mana_special_attack = 0;
+	int cost_mana_buff = 0;
 
 	std::string name;
 };
@@ -47,15 +70,20 @@ void BattleIA()
 
 }
 
-void BattlePlayer()
+void PrintPlayerIATitle()
 {
-	system("cls");
 	printf("-----------------------------------------------------------------------\n");
 	printf("----------------------------Player vs IA-------------------------------\n");
 	printf("-----------------------------------------------------------------------\n\n");
+}
 
-	Character player(10, 5, 100, 60, 8, 4, 10, "Player");
-	Character enemy(10, 5, 100, 60, 8, 4, 8, "Enemy");
+void BattlePlayer()
+{
+	system("cls");
+	PrintPlayerIATitle();
+
+	Character player(10, 4, 100, 60, 20, 10, "Player", 15, 10);
+	Character enemy(10, 4, 100, 60, 20, 10, "Enemy", 15, 10);
 	Character* active = Character::CompareSpeed(&player, &enemy);
 
 	int round = 1;
@@ -64,9 +92,59 @@ void BattlePlayer()
 	enemy.PrintStats();
 	
 	while (player.IsAlive() && enemy.IsAlive()) {
-		char intro_input = getchar();
-		printf("ROUND NUMEBER %i\n", round);
-		printf("%s turn\n", active->GetName());
+		printf("----------------------------ROUND NUMEBER %i----------------------------\n", round);
+		printf("---------------%s turn---------------\n\n", active->GetName());
+
+		if (active == &player) {
+			printf(" Choose your action:\n");
+			printf("	A) Basic Attack (a)\n");
+			printf("	B) Special Attack (%i mana) (b)\n", active->CostSpecialAttack());
+			printf("	C) Buff Attack (%i mana) (c)\n", active->CostBuff());
+			printf("	D) Buff Defense (%i mana) (d)\n", active->CostBuff());
+
+			bool next_turn = false;
+			while (!next_turn) {
+				char action = getchar();
+				switch (action)
+				{
+				case 'a': {
+
+					break; }
+				case 'b': {
+					if (active->CanDoSpecialAttack()) {
+
+					}
+					else {
+						printf("You don't have enough mana\n");
+					}
+					break; }
+				case 'c': {
+					if (active->CanDoBuff()) {
+
+					}
+					else {
+						printf("You don't have enough mana\n");
+					}
+					break; }
+				case 'd': {
+					if (active->CanDoBuff()) {
+
+					}
+					else {
+						printf("You don't have enough mana\n");
+					}
+					break; }
+				case '\n': {
+					break; }
+				default: {
+					printf("Choose a correct action\n");
+					break; }
+				}
+			}
+		}
+		else {
+
+		}
 	}
 
 
