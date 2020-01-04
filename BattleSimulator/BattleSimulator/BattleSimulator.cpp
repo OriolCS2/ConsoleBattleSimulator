@@ -269,8 +269,90 @@ void PrintMainMenu()
 	printf(" 3- Minion vs Minion (3)\n");
 	printf(" 4- Player vs Minion (4)\n");
 	printf(" 5- Player vs Boss (5)\n");
-	printf(" 6- Exit (6)\n");
+	printf(" 6- Simulate 100 Boss vs Boss (6)\n");
+	printf(" 7- Simulate 100 Boss vs Minion (7)\n");
+	printf(" 8- Simulate 100 Minion vs Minion (8)\n");
+	printf(" 9- Exit (9)\n");
 	printf("\n");
+}
+
+void BattleIAx100()
+{
+	int total_win_1 = 0;
+	int total_win_2 = 0;
+
+	Character enemy1, enemy2;
+
+	for (int i = 0; i < 100; ++i) {
+		switch (state) {
+		case BOSS_BOSS: {
+			enemy1 = { 12, 7, 120, 100, 30, 11, "Boss1", 20, 10 };
+			enemy2 = { 12, 7, 120, 100, 30, 11, "Boss2", 20, 10 };
+			break; }
+		case BOSS_MINON: {
+			enemy1 = { 12, 7, 120, 60, 30, 11, "Boss", 20, 10 };
+			enemy2 = { 9, 3, 50, 45, 12, 6, "Minion", 15, 15 };
+			break; }
+		case MINION_MINION: {
+			enemy1 = { 9, 3, 50, 45, 12, 6, "Minion1", 15, 15 };
+			enemy2 = { 9, 3, 50, 45, 12, 6, "Minion2", 15, 15 };
+			break; }
+		default: {
+			break; }
+		}
+
+		Character* active = Character::CompareSpeed(&enemy1, &enemy2);
+
+		int turn = 0;
+		bool round_finished = true;
+		int round = 1;
+		while (enemy1.IsAlive() && enemy2.IsAlive()) {
+			if (round_finished) {
+				printf("----------------------------ROUND NUMBER %i----------------------------\n", round);
+				round_finished = false;
+			}
+			printf("---------------%s turn---------------\n\n", active->GetName());
+
+			if (active == &enemy1) {
+				++turn;
+				active->DoRandomAttack(&enemy2);
+				active = &enemy2;
+			}
+			else {
+				++turn;
+				active->DoRandomAttack(&enemy1);
+				active = &enemy1;
+			}
+			printf("\n");
+			if (turn == 2) {
+				++round;
+				turn = 0;
+				round_finished = true;
+			}
+		}
+
+		if (enemy1.IsAlive()) {
+			printf(" \n%s won the battle\n", enemy1.GetName());
+			++total_win_1;
+		}
+		else {
+			printf(" \n%s won the battle\n", enemy2.GetName());
+			++total_win_2;
+		}
+		if (i != 99) {
+			printf(" \nNEXT BATTLE!!\n");
+		}
+	}
+	printf("\n---------------100 simulations finished---------------\n");
+	printf("---------%s won: %i\n", enemy1.GetName(), total_win_1);
+	printf("---------%s won: %i\n", enemy2.GetName(), total_win_2);
+	printf(" \nClick enter to return main menu\n");
+	getchar();
+	getchar();
+	state = INIT;
+	system("cls");
+
+	PrintMainMenu();
 }
 
 void BattleIA()
@@ -516,6 +598,18 @@ int main()
 			BattlePlayer();
 			break; }
 		case '6': {
+			state = BOSS_BOSS;
+			BattleIAx100();
+			break; }
+		case '7': {
+			state = BOSS_MINON;
+			BattleIAx100();
+			break; }
+		case '8': {
+			state = MINION_MINION;
+			BattleIAx100();
+			break; }
+		case '9': {
 			state = EXIT;
 			break; }
 		case '\n': {
