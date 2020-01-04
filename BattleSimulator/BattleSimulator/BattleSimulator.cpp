@@ -46,9 +46,7 @@ public:
 		else {
 			against->DecreaseHealth(special_attack);
 		}
-		if (against->IsAlive()) {
-			printf(" %s was hitted with a special attack and has %i health\n", against->name.data(), against->GetHealth());
-		}
+		printf(" %s was hitted with a special attack and has %i health\n", against->name.data(), against->GetHealth());
 	}
 	void DoBasicAttack(Character* against) {
 		if (time_buff_attack != 0) {
@@ -57,9 +55,7 @@ public:
 		else {
 			against->DecreaseHealth(basic_attack);
 		}
-		if (against->IsAlive()) {
-			printf(" %s was hitted with a basic attack and has %i health\n", against->name.data(), against->GetHealth());
-		}
+		printf(" %s was hitted with a basic attack and has %i health\n", against->name.data(), against->GetHealth());
 	}
 	void DecreaseHealth(int damage) {
 		if (time_buff_defense != 0) {
@@ -80,10 +76,12 @@ public:
 		return mana;
 	}
 	void BuffAttack() {
+		mana -= cost_mana_buff;
 		time_buff_attack = buff_duration;
 		printf(" %s Attack and special attack increased by %i points for %i rounds\n", name.data(), Character::buff_attack, Character::buff_duration - 1);
 	}
 	void BuffDefense() {
+		mana -= cost_mana_buff;
 		time_buff_defense = buff_duration;
 		printf(" %s Defense increased by %i points for %i rounds\n", name.data(), Character::buff_defense, Character::buff_duration - 1);
 	}
@@ -266,7 +264,15 @@ void BattlePlayer()
 	printf("-----------------------------------------------------------------------\n\n");
 
 	Character player(10, 4, 100, 60, 20, 10, "Player", 15, 10);
-	Character enemy(10, 4, 100, 60, 20, 10, "Enemy", 15, 10);
+	Character enemy(10, 4, 1, 60, 20, 10, "Enemy", 15, 10);
+
+	/*if (algo) { per minion i per boss
+		Character enemy(10, 4, 100, 60, 20, 10, "Enemy", 15, 10);
+	}
+	else {
+		Character enemy(10, 4, 100, 60, 20, 10, "Enemy", 15, 10);
+	}*/
+
 	Character* active = Character::CompareSpeed(&player, &enemy);
 
 	int round = 1;
@@ -284,7 +290,7 @@ void BattlePlayer()
 	bool round_finished = true;
 	while (player.IsAlive() && enemy.IsAlive()) {
 		if (round_finished) {
-			printf("----------------------------ROUND NUMEBER %i----------------------------\n", round);
+			printf("----------------------------ROUND NUMBER %i----------------------------\n", round);
 			round_finished = false;
 		}
 		printf("---------------%s turn---------------\n\n", active->GetName());
@@ -382,9 +388,27 @@ void BattlePlayer()
 			round_finished = true;
 		}
 	}
-	printf("WIN!!");
+	if (enemy.IsAlive()) {
+		printf(" \n%s won the battle :(\n", enemy.GetName());
+	}
+	else {
+		printf(" \n%s won the battle :)\n", player.GetName());
+	}
+	printf(" \nClick enter to return main menu\n");
 	getchar();
-	// TOOD: return to main menu
+	getchar();
+	state = INIT;
+	system("cls");
+	printf("-----------------------------------------------------------------------\n");
+	printf("--------------------Welcome to the Battle Simulator--------------------\n");
+	printf("-----------------------------------------------------------------------\n\n");
+	printf(" What do you want to do?\n\n");
+
+	// first menu inputs
+	printf(" 1- IA vs IA (1)\n");
+	printf(" 2- Player vs IA (2)\n");
+	printf(" 3- Exit (3)\n");
+	printf("\n");
 }
 
 int main()
