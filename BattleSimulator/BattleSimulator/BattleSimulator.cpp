@@ -1,9 +1,13 @@
 #include <iostream>
 #include <time.h>
+#include "BattleSimulator.h"
 
 enum State {
-	IA,
-	PLAYER,
+	BOSS_BOSS,
+	MINION_MINION,
+	BOSS_MINON,
+	PLAYER_BOSS,
+	PLAYER_MINION,
 	EXIT,
 	INIT,
 };
@@ -12,6 +16,7 @@ State state = INIT;
 class Character {
 
 public:
+	Character() {}
 	Character(int basic_attack, int defense, int live, int mana, int special_attack, int speed, const char* name, 
 		int cost_mana_special_attack, int cost_mana_buff)
 		: basic_attack(basic_attack), defense(defense), live(live), mana(mana), speed(speed), name(name),
@@ -104,7 +109,7 @@ public:
 		bool do_buff_defense = false;
 		bool basic = false;
 		bool special = false;
-		srand(time(NULL));
+		
 		if (time_buff_attack != 0 && time_buff_defense != 0) { // 2 buffs
 			int r = rand() % 2;
 			switch (r) {
@@ -251,9 +256,85 @@ public:
 	static const int buff_duration = 4; // the turn you buff counts here too
 };
 
+void PrintMainMenu()
+{
+	printf("-----------------------------------------------------------------------\n");
+	printf("--------------------Welcome to the Battle Simulator--------------------\n");
+	printf("-----------------------------------------------------------------------\n\n");
+	printf(" What do you want to do?\n\n");
+
+	// first menu inputs
+	printf(" 1- Boss vs Boss (1)\n");
+	printf(" 2- Boss vs Minion (2)\n");
+	printf(" 3- Minion vs Minion (3)\n");
+	printf(" 4- Player vs Minion (4)\n");
+	printf(" 5- Player vs Boss (5)\n");
+	printf(" 6- Exit (6)\n");
+	printf("\n");
+}
+
 void BattleIA()
 {
+	Character enemy1, enemy2;
+	switch (state) {
+	case BOSS_BOSS: {
+		enemy1 = { 12, 7, 120, 100, 30, 11, "Boss1", 20, 10 };
+		enemy2 = { 12, 7, 120, 100, 30, 11, "Boss2", 20, 10 };
+		break; }
+	case BOSS_MINON: {
+		enemy1 = { 12, 7, 120, 60, 30, 11, "Boss", 20, 10 };
+		enemy2 = { 9, 3, 50, 45, 12, 6, "Minion", 15, 15 };
+		break; }
+	case MINION_MINION: {
+		enemy1 = { 9, 3, 50, 45, 12, 6, "Minion1", 15, 15 };
+		enemy2 = { 9, 3, 50, 45, 12, 6, "Minion2", 15, 15 };
+		break; }
+	default: {
+		break; }
+	}
+	Character* active = Character::CompareSpeed(&enemy1, &enemy2);
 
+	int turn = 0;
+	bool round_finished = true;
+	int round = 1;
+	while (enemy1.IsAlive() && enemy2.IsAlive()) {
+		if (round_finished) {
+			printf("----------------------------ROUND NUMBER %i----------------------------\n", round);
+			round_finished = false;
+		}
+		printf("---------------%s turn---------------\n\n", active->GetName());
+
+		if (active == &enemy1) {
+			++turn;
+			active->DoRandomAttack(&enemy2);
+			active = &enemy2;
+		}
+		else {
+			++turn;
+			active->DoRandomAttack(&enemy1);
+			active = &enemy1;
+		}
+		printf("\n");
+		if (turn == 2) {
+			++round;
+			turn = 0;
+			round_finished = true;
+		}
+	}
+
+	if (enemy1.IsAlive()) {
+		printf(" \n%s won the battle\n", enemy1.GetName());
+	}
+	else {
+		printf(" \n%s won the battle\n", enemy2.GetName());
+	}
+	printf(" \nClick enter to return main menu\n");
+	getchar();
+	getchar();
+	state = INIT;
+	system("cls");
+
+	PrintMainMenu();
 }
 
 void BattlePlayer()
@@ -263,15 +344,19 @@ void BattlePlayer()
 	printf("----------------------------Player vs IA-------------------------------\n");
 	printf("-----------------------------------------------------------------------\n\n");
 
-	Character player(10, 4, 100, 60, 20, 10, "Player", 15, 10);
-	Character enemy(10, 4, 1, 60, 20, 10, "Enemy", 15, 10);
+	Character player(14, 6, 100, 90, 20, 10, "Player", 15, 10);
+	Character enemy;
 
-	/*if (algo) { per minion i per boss
-		Character enemy(10, 4, 100, 60, 20, 10, "Enemy", 15, 10);
+	switch (state) {
+	case PLAYER_BOSS: {
+		enemy = { 12, 7, 120, 60, 30, 11, "Boss", 20, 10 };
+		break; }
+	case PLAYER_MINION: {
+		enemy = { 9, 3, 50, 45, 12, 6, "Minion", 15, 15 };
+		break; }
+	default: {
+		break; }
 	}
-	else {
-		Character enemy(10, 4, 100, 60, 20, 10, "Enemy", 15, 10);
-	}*/
 
 	Character* active = Character::CompareSpeed(&player, &enemy);
 
@@ -399,52 +484,44 @@ void BattlePlayer()
 	getchar();
 	state = INIT;
 	system("cls");
-	printf("-----------------------------------------------------------------------\n");
-	printf("--------------------Welcome to the Battle Simulator--------------------\n");
-	printf("-----------------------------------------------------------------------\n\n");
-	printf(" What do you want to do?\n\n");
-
-	// first menu inputs
-	printf(" 1- IA vs IA (1)\n");
-	printf(" 2- Player vs IA (2)\n");
-	printf(" 3- Exit (3)\n");
-	printf("\n");
+	
+	PrintMainMenu();
 }
 
 int main()
 {
-	printf("-----------------------------------------------------------------------\n");
-	printf("--------------------Welcome to the Battle Simulator--------------------\n");
-	printf("-----------------------------------------------------------------------\n\n");
-	printf(" What do you want to do?\n\n");
-
-	// first menu inputs
-	printf(" 1- IA vs IA (1)\n");
-	printf(" 2- Player vs IA (2)\n");
-	printf(" 3- Exit (3)\n");
-	printf("\n");
+	srand(time(NULL));
+	PrintMainMenu();
 	while (state != EXIT) {
 		char intro_input = getchar();
 		switch (intro_input) {
 		case '1': {
-			state = IA;
+			state = BOSS_BOSS;
 			BattleIA();
 			break; }
 		case '2': {
-			state = PLAYER;
-			BattlePlayer();
+			state = BOSS_MINON;
+			BattleIA();
 			break; }
 		case '3': {
+			state = MINION_MINION;
+			BattleIA();
+			break; }
+		case '4': {
+			state = PLAYER_MINION;
+			BattlePlayer();
+			break; }
+		case '5': {
+			state = PLAYER_BOSS;
+			BattlePlayer();
+			break; }
+		case '6': {
 			state = EXIT;
 			break; }
 		case '\n': {
 			break; }
 		default: {
-			printf(" Choose a valid input, %c is not valid\n", intro_input);
-			printf(" 1- IA vs IA (1)\n");
-			printf(" 2- Player vs IA (2)\n");
-			printf(" 3- Exit (3)\n");
-			printf("\n");
+			PrintMainMenu();
 			break; }
 		}
 	}
